@@ -24,6 +24,10 @@ type XfersError struct {
 	Error string
 }
 
+type XfersMsg struct {
+	Msg string `json:"msg"`
+}
+
 type XfersAccount struct {
 	AvailableBalance float64
 	LedgerBalance    float64
@@ -97,6 +101,13 @@ type XfersCharge struct {
 	Status              string `json:"status"`
 }
 
+type XfersVerifyParam struct {
+	OrderId     string `json:"order_id"`
+	TotalAmount string `json:"total_amount"`
+	Currency    string `json:"currency"`
+	Status      string `json:"status"`
+}
+
 func NewClient(key string, usesSandbox bool) (*XfersClient, error) {
 	if key == "" {
 		return nil, errors.New("Missing API Key")
@@ -161,10 +172,13 @@ func (xClient *XfersClient) GetAccountInfo() (XfersAccount, error) {
 	return xfersAccount, err
 }
 
-func (xClient *XfersClient) CreateCharge(charge XfersChargeReqParam) (XfersCharge, error) {
+func (xClient *XfersClient) CreateCharge(param XfersChargeReqParam) (XfersCharge, error) {
 	xfersCharge := XfersCharge{}
-	chargeJson, _ := json.Marshal(charge)
-	req, err := http.NewRequest("POST", xClient.Endpoint+"/charges", bytes.NewReader(chargeJson))
+	paramJson, err := json.Marshal(param)
+	if err != nil {
+		return xfersCharge, err
+	}
+	req, err := http.NewRequest("POST", xClient.Endpoint+"/charges", bytes.NewReader(paramJson))
 	if err != nil {
 		return xfersCharge, err
 	}
@@ -192,6 +206,11 @@ func (xClient *XfersClient) RetrieveCharge(id string) (XfersCharge, error) {
 
 func (xClient *XfersClient) ListAllCharges() ([]XfersCharge, error) {
 	xfersCharges := []XfersCharge{}
+	// supported params
+	// customer - only returns specified customer ID
+	// ending_before - cursor for position, use order_id
+	// starting_after
+	// limit
 	req, err := http.NewRequest("GET", xClient.Endpoint+"/charges", nil)
 	if err != nil {
 		return xfersCharges, err
@@ -202,4 +221,22 @@ func (xClient *XfersClient) ListAllCharges() ([]XfersCharge, error) {
 	}
 	err = json.Unmarshal(resp, &xfersCharges)
 	return xfersCharges, err
+}
+
+func (xClient *XfersClient) VerifyCharge(id string, param XfersVerifyParam) (XfersMsg, error) {
+	xfersMsg := XfersMsg{}
+	paramJson, err := json.Marshal(param)
+	if err != nil {
+		return xfersMsg, err
+	}
+	req, err := http.NewRequest("POST", xClient.Endpoint+"/charges/"+id+"/validate", bytes.NewReader(paramJson))
+	if err != nil {
+		return xfersMsg, err
+	}
+	resp, err := xClient.PerformRequest(req)
+	if err != nil {
+		return xfersMsg, err
+	}
+	err = json.Unmarshal(resp, &xfersMsg)
+	return xfersMsg, err
 }

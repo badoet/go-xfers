@@ -16,8 +16,7 @@ const XFERS_ENDPOINT_SANDBOX = "https://sandbox.xfers.io/api/v3"
 const XFERS_ENDPOINT = "https://www.xfers.io/api/v3"
 const IS_SANDBOX = true
 const TEST_KEY = "DqwoaCmbbLCLAYkZZ5DxgrwBxFdK_srHQn7XSTiBnWk"
-
-// const TEST_KEY = "Jaf5Q4K7Ns7jSbEtaFyxNPtaDNZJ4EfNnDZx7XzUyyc"
+const RECEIPT_EMAIL = ""
 
 func TestNewClient(t *testing.T) {
 	_, err := xfers.NewClient("", true)
@@ -63,7 +62,7 @@ func TestCreateCharge(t *testing.T) {
 	fmt.Println("Xfers: Create Charge")
 	xClient, _ := xfers.NewClient(TEST_KEY, IS_SANDBOX)
 	chargeParam := xfers.XfersChargeReqParam{}
-	chargeParam.Amount = "100.232"
+	chargeParam.Amount = "100.23"
 	chargeParam.Currency = "SGD"
 	chargeParam.OrderId = RandSeq(10)
 	chargeParam.Description = "Test create charge"
@@ -72,8 +71,8 @@ func TestCreateCharge(t *testing.T) {
 	chargeParam.CancelUrl = "http://test.com/cancel"
 	chargeParam.Redirect = "false"
 	chargeParam.Refundable = "true"
-	chargeParam.CancelUrl = "admin@email.com"
-	chargeParam.HrsToExpirations = "48.0"
+	chargeParam.ReceiptEmail = RECEIPT_EMAIL
+	chargeParam.HrsToExpirations = "0.1"
 	xfersCharge, err := xClient.CreateCharge(chargeParam)
 	if err != nil {
 		t.Errorf("Did not expect any error, but get: %s.", err.Error())
