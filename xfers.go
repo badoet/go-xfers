@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
-	"fmt"
+	// "fmt"
 	"io/ioutil"
 	"net/http"
 	// "net/url"
@@ -46,7 +46,7 @@ type XfersAccount struct {
 	PhoneNo          string
 }
 
-type XfersCharge struct {
+type XfersChargeReqParam struct {
 	Amount      string `json:"amount"`      // ! total XfersCharge.Items.price must sum up to XferCharge.Amount
 	Currency    string `json:"currency"`    // !
 	OrderId     string `json:"order_id"`    // !
@@ -75,7 +75,7 @@ type XfersItem struct {
 	ItemId      string
 }
 
-type XfersChargeResponse struct {
+type XfersCharge struct {
 	Id                  string `json:"id"`
 	CheckoutUrl         string `json:"checkout_url"`
 	NotifyUrl           string `json:"notify_url"`
@@ -114,10 +114,6 @@ func NewClient(key string, usesSandbox bool) (*XfersClient, error) {
 }
 
 func (xClient *XfersClient) PerformRequest(req *http.Request) ([]byte, error) {
-
-	// fmt.Println(xClient.Endpoint + apiUrl)
-	// fmt.Println("X-XFERS-USER-API-KEY", xClient.key)
-
 	req.Header.Add("X-XFERS-USER-API-KEY", xClient.key)
 	req.Header.Add("Content-Type", "application/json")
 
@@ -137,59 +133,73 @@ func (xClient *XfersClient) PerformRequest(req *http.Request) ([]byte, error) {
 		return nil, errors.New("Missing body")
 	}
 
-	errorResponse := XfersError{}
-	err = json.Unmarshal(body, &errorResponse)
-	if err != nil {
-		return nil, err
-	}
-	if errorResponse.Error != "" {
-		return nil, errors.New(errorResponse.Error)
+	if string(body[0:1]) != "[" {
+		errorResponse := XfersError{}
+		err = json.Unmarshal(body, &errorResponse)
+		if err != nil {
+			return nil, err
+		}
+		if errorResponse.Error != "" {
+			return nil, errors.New(errorResponse.Error)
+		}
 	}
 
 	return body, err
 }
 
 func (xClient *XfersClient) GetAccountInfo() (XfersAccount, error) {
-	account := XfersAccount{}
+	xfersAccount := XfersAccount{}
 	req, err := http.NewRequest("GET", xClient.Endpoint+"/user", nil)
 	if err != nil {
-		return account, err
+		return xfersAccount, err
 	}
 	resp, err := xClient.PerformRequest(req)
 	if err != nil {
-		return account, err
+		return xfersAccount, err
 	}
-	err = json.Unmarshal(resp, &account)
-	return account, err
+	err = json.Unmarshal(resp, &xfersAccount)
+	return xfersAccount, err
 }
 
-func (xClient *XfersClient) CreateCharge(charge XfersCharge) (XfersChargeResponse, error) {
-	response := XfersChargeResponse{}
-	// values := url.Values{}
-	// values.Add("amount", fmt.Sprintf("%.2f", charge.Amount))
-	// values.Add("currency", charge.Currency)
-	// values.Add("order_id", charge.OrderId)
-	// values.Add("description", charge.Description)
-	// values.Add("notify_url", charge.NotifyUrl)
-	// values.Add("return_url", charge.ReturnUrl)
-	// values.Add("cancel_url", charge.CancelUrl)
-	// values.Add("redirect", charge.Redirect)
-	// values.Add("receipt_email", charge.ReceiptEmail)
-	// req, err := http.NewRequest("POST", xClient.Endpoint+"/charges", bytes.NewBufferString(values.Encode()))
+func (xClient *XfersClient) CreateCharge(charge XfersChargeReqParam) (XfersCharge, error) {
+	xfersCharge := XfersCharge{}
 	chargeJson, _ := json.Marshal(charge)
-	fmt.Printf("%s", string(chargeJson))
 	req, err := http.NewRequest("POST", xClient.Endpoint+"/charges", bytes.NewReader(chargeJson))
 	if err != nil {
-		fmt.Println("Err create request")
-		return response, err
+		return xfersCharge, err
 	}
 	resp, err := xClient.PerformRequest(req)
-	fmt.Println("Create Charge Response:")
-	fmt.Printf("%s\n", resp)
 	if err != nil {
-		fmt.Println("Err perform request")
-		return response, err
+		return xfersCharge, err
 	}
-	err = json.Unmarshal(resp, &response)
-	return response, err
+	err = json.Unmarshal(resp, &xfersCharge)
+	return xfersCharge, err
+}
+
+func (xClient *XfersClient) RetrieveCharge(id string) (XfersCharge, error) {
+	xfersCharge := XfersCharge{}
+	req, err := http.NewRequest("GET", xClient.Endpoint+"/charges/"+id, nil)
+	if err != nil {
+		return xfersCharge, err
+	}
+	resp, err := xClient.PerformRequest(req)
+	if err != nil {
+		return xfersCharge, err
+	}
+	err = json.Unmarshal(resp, &xfersCharge)
+	return xfersCharge, err
+}
+
+func (xClient *XfersClient) ListAllCharges() ([]XfersCharge, error) {
+	xfersCharges := []XfersCharge{}
+	req, err := http.NewRequest("GET", xClient.Endpoint+"/charges", nil)
+	if err != nil {
+		return xfersCharges, err
+	}
+	resp, err := xClient.PerformRequest(req)
+	if err != nil {
+		return xfersCharges, err
+	}
+	err = json.Unmarshal(resp, &xfersCharges)
+	return xfersCharges, err
 }

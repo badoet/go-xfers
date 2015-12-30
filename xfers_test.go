@@ -14,10 +14,10 @@ import (
 
 const XFERS_ENDPOINT_SANDBOX = "https://sandbox.xfers.io/api/v3"
 const XFERS_ENDPOINT = "https://www.xfers.io/api/v3"
+const IS_SANDBOX = true
+const TEST_KEY = "DqwoaCmbbLCLAYkZZ5DxgrwBxFdK_srHQn7XSTiBnWk"
 
-// const TEST_KEY = "DqwoaCmbbLCLAYkZZ5DxgrwBxFdK_srHQn7XSTiBnWk"
-
-const TEST_KEY = "Jaf5Q4K7Ns7jSbEtaFyxNPtaDNZJ4EfNnDZx7XzUyyc"
+// const TEST_KEY = "Jaf5Q4K7Ns7jSbEtaFyxNPtaDNZJ4EfNnDZx7XzUyyc"
 
 func TestNewClient(t *testing.T) {
 	_, err := xfers.NewClient("", true)
@@ -38,7 +38,7 @@ func TestNewClient(t *testing.T) {
 
 func TestPerformRequest(t *testing.T) {
 	fmt.Println("Xfers: Perform Request")
-	xClient, _ := xfers.NewClient(TEST_KEY, false)
+	xClient, _ := xfers.NewClient(TEST_KEY, IS_SANDBOX)
 	req, _ := http.NewRequest("GET", xClient.Endpoint+"/authorize/hello", nil)
 	response, err := xClient.PerformRequest(req)
 	if err != nil {
@@ -50,36 +50,56 @@ func TestPerformRequest(t *testing.T) {
 
 func TestGetAccount(t *testing.T) {
 	fmt.Println("Xfers: Get Account")
-	xClient, _ := xfers.NewClient(TEST_KEY, false)
+	xClient, _ := xfers.NewClient(TEST_KEY, IS_SANDBOX)
 	account, err := xClient.GetAccountInfo()
 	if err != nil {
 		t.Errorf("Did not expect any error, but get: %s.", err.Error())
 	}
-	fmt.Printf("%v", account)
+	fmt.Printf("%+v", account)
 	fmt.Println("")
 }
 
 func TestCreateCharge(t *testing.T) {
 	fmt.Println("Xfers: Create Charge")
-	xClient, _ := xfers.NewClient(TEST_KEY, false)
-	charge := xfers.XfersCharge{}
-	charge.Amount = "100.232"
-	charge.Currency = "SGD"
-	charge.OrderId = RandSeq(10)
-	charge.Description = "Test create charge"
-	charge.NotifyUrl = "http://test.com/notify"
-	charge.ReturnUrl = "http://test.com/return"
-	charge.CancelUrl = "http://test.com/cancel"
-	charge.Redirect = "false"
-	charge.Refundable = "true"
-	charge.CancelUrl = "admin@email.com"
-	charge.HrsToExpirations = "48.0"
-	chargeResponse, err := xClient.CreateCharge(charge)
+	xClient, _ := xfers.NewClient(TEST_KEY, IS_SANDBOX)
+	chargeParam := xfers.XfersChargeReqParam{}
+	chargeParam.Amount = "100.232"
+	chargeParam.Currency = "SGD"
+	chargeParam.OrderId = RandSeq(10)
+	chargeParam.Description = "Test create charge"
+	chargeParam.NotifyUrl = "https://www.ikoustyle.com/test/xfers/callback"
+	chargeParam.ReturnUrl = "http://test.com/return"
+	chargeParam.CancelUrl = "http://test.com/cancel"
+	chargeParam.Redirect = "false"
+	chargeParam.Refundable = "true"
+	chargeParam.CancelUrl = "admin@email.com"
+	chargeParam.HrsToExpirations = "48.0"
+	xfersCharge, err := xClient.CreateCharge(chargeParam)
 	if err != nil {
 		t.Errorf("Did not expect any error, but get: %s.", err.Error())
 	}
-	fmt.Println("Charge resp")
-	fmt.Printf("%v", chargeResponse)
+	fmt.Println("Xfers Charge:")
+	fmt.Printf("%+v", xfersCharge)
+	fmt.Println("")
+
+	fmt.Println("Xfers: Retrieve Charge Details")
+	xfersChargeCheck, err := xClient.RetrieveCharge(xfersCharge.Id)
+	if err != nil {
+		t.Errorf("Did not expect any error, but get: %s.", err.Error())
+	}
+	fmt.Println("Xfers Charge Check:")
+	fmt.Printf("%+v", xfersChargeCheck)
+	fmt.Println("")
+}
+
+func TestListAllCharges(t *testing.T) {
+	fmt.Println("Xfers: List All Charges")
+	xClient, _ := xfers.NewClient(TEST_KEY, IS_SANDBOX)
+	xfersCharges, err := xClient.ListAllCharges()
+	if err != nil {
+		t.Errorf("Did not expect any error, but get: %s.", err.Error())
+	}
+	fmt.Printf("%+v", xfersCharges)
 	fmt.Println("")
 }
 
