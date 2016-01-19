@@ -51,32 +51,32 @@ type XfersAccount struct {
 }
 
 type XfersChargeReqParam struct {
-	Amount      string `json:"amount"`      // ! total XfersCharge.Items.price must sum up to XferCharge.Amount
-	Currency    string `json:"currency"`    // !
-	OrderId     string `json:"order_id"`    // !
-	Description string `json:"description"` // !
-	NotifyUrl   string `json:"notify_url"`
-	ReturnUrl   string `json:"return_url"`
-	CancelUrl   string `json:"cancel_url"`
-	Refundable  string `json:"refundable"` // Default true
-	// UserApiToken     string `json:"user_api_token"` // Optional
-	// UserPhoneNo      string `json:"user_phone_no"`  // Default false
-	// DebitOnly        string `json:"debit_only"`     // Default false
-	Redirect string `json:"redirect"` // Default true
-	// Items            string `json:"items"`          // JSON formatted array of items- description, name, price, quantity
-	// Shipping         string `json:"shipping"`
-	// Tax              string `json:"tax"`
-	HrsToExpirations string `json:"hrs_to_expirations"` // Default to 48 hours from now
-	// MetaData         string `json:"meta_data"`          // Key value pairs json
-	ReceiptEmail string `json:"receipt_email"`
+	Amount           string      `json:"amount"`      // ! total XfersCharge.Items.price must sum up to XferCharge.Amount
+	Currency         string      `json:"currency"`    // !
+	OrderId          string      `json:"order_id"`    // !
+	Description      string      `json:"description"` // !
+	NotifyUrl        string      `json:"notify_url,omitempty"`
+	ReturnUrl        string      `json:"return_url,omitempty"`
+	CancelUrl        string      `json:"cancel_url,omitempty"`
+	Refundable       string      `json:"refundable,omitempty"` // Default true
+	Redirect         string      `json:"redirect,omitempty"`   // Default true
+	Items            []XfersItem `json:"items,omitempty"`      // JSON formatted array of items- description, name, price, quantity
+	Shipping         string      `json:"shipping,omitempty"`
+	Tax              string      `json:"tax,omitempty"`
+	HrsToExpirations string      `json:"hrs_to_expirations,omitempty"` // Default to 48 hours from now
+	ReceiptEmail     string      `json:"receipt_email,omitempty"`
+	UserApiToken     string      `json:"user_api_token,omitempty"` // Optional
+	UserPhoneNo      string      `json:"user_phone_no,omitempty"`  // Default false
+	DebitOnly        string      `json:"debit_only,omitempty"`     // Default false
+	MetaData         string      `json:"meta_data,omitempty"`      // Key value pairs json
 }
 
 type XfersItem struct {
-	Description string
-	Name        string
-	Price       float64
-	Quantity    float64
-	ItemId      string
+	Description string  `json:"description"`
+	Name        string  `json:"name"`
+	Price       float64 `json:"price"`
+	Quantity    float64 `json:"quantity"`
+	ItemId      string  `json:"item_id,omitempty"` // Optional
 }
 
 type XfersCharge struct {
@@ -129,10 +129,10 @@ func (xClient *XfersClient) PerformRequest(req *http.Request) ([]byte, error) {
 	req.Header.Add("Content-Type", "application/json")
 
 	resp, err := xClient.client.Do(req)
+	defer resp.Body.Close()
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
 
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
