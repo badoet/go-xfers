@@ -6,6 +6,12 @@ go-xfers
 Xfers api interface using golang
 https://www.xfers.io/
 
+Xfers api documentation:
+http://xfers.github.io/docs/
+
+There are more api in the documentations that has yet to be implemented.
+This library only use the minimum required api to perform transaction with Xfers
+
 Xfers Version : 3.0
 
 Feature:
@@ -35,6 +41,6 @@ There's a test suite included.  To run it, simply run:
 
 You'll have to have set the following environment variables to run the tests:
 
-    export XFERS_TEST_KEY=XXX (Your XFERS Sandbox key)
+    export XFERS_TEST_KEY=XXX (Your Xfers Sandbox key, get from: https://sandbox.xfers.io/api_tokens)
 
 Tests currently run in sandbox.
