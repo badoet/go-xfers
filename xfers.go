@@ -4,10 +4,8 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
-	// "fmt"
 	"io/ioutil"
 	"net/http"
-	// "net/url"
 )
 
 const XFERS_ENDPOINT_SANDBOX = "https://sandbox.xfers.io/api/v3"
@@ -106,6 +104,14 @@ type XfersVerifyParam struct {
 	TotalAmount string `json:"total_amount"`
 	Currency    string `json:"currency"`
 	Status      string `json:"status"`
+}
+
+type XfersNotifyParam struct {
+	TxnId       string  `json:"txn_id"`
+	OrderId     string  `json:"order_id"`
+	TotalAmount float64 `json:"total_amount"`
+	Currency    string  `json:"currency"`
+	Status      string  `json:"status"` // “cancelled” or “paid” or “expired”
 }
 
 func NewClient(key string, usesSandbox bool) (*XfersClient, error) {

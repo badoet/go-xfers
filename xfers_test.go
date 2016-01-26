@@ -4,21 +4,26 @@ import (
 	"../go-xfers"
 	"crypto/rand"
 	"encoding/binary"
-	// "os"
-	// "strings"
-	"fmt"
 	random "math/rand"
 	"net/http"
+	"os"
 	"testing"
 )
 
 const XFERS_ENDPOINT_SANDBOX = "https://sandbox.xfers.io/api/v3"
 const XFERS_ENDPOINT = "https://www.xfers.io/api/v3"
-const IS_SANDBOX = true
-const TEST_KEY = "DqwoaCmbbLCLAYkZZ5DxgrwBxFdK_srHQn7XSTiBnWk"
-const RECEIPT_EMAIL = "gunawan.stanley@gmail.com"
+const IS_SANDBOX = true // for testing always use the sandbox version
+
+func fetchEnvVars(t *testing.T) (key string) {
+	key = os.Getenv("XFERS_TEST_KEY")
+	if len(key) <= 0 {
+		t.Fatalf("Test cannot run because cannot get environment variable XFERS_TEST_KEY")
+	}
+	return
+}
 
 func TestNewClient(t *testing.T) {
+	TEST_KEY := fetchEnvVars(t)
 	_, err := xfers.NewClient("", true)
 	if err == nil {
 		t.Errorf("Expected an error, due to missing API Key.")
@@ -36,30 +41,26 @@ func TestNewClient(t *testing.T) {
 }
 
 func TestPerformRequest(t *testing.T) {
-	fmt.Println("Xfers: Perform Request")
+	TEST_KEY := fetchEnvVars(t)
 	xClient, _ := xfers.NewClient(TEST_KEY, IS_SANDBOX)
 	req, _ := http.NewRequest("GET", xClient.Endpoint+"/authorize/hello", nil)
-	response, err := xClient.PerformRequest(req)
+	_, err := xClient.PerformRequest(req)
 	if err != nil {
 		t.Errorf("Did not expect any error, but get: %s", err.Error())
 	}
-	fmt.Printf("%s", response)
-	fmt.Println("")
 }
 
 func TestGetAccount(t *testing.T) {
-	fmt.Println("Xfers: Get Account")
+	TEST_KEY := fetchEnvVars(t)
 	xClient, _ := xfers.NewClient(TEST_KEY, IS_SANDBOX)
-	account, err := xClient.GetAccountInfo()
+	_, err := xClient.GetAccountInfo()
 	if err != nil {
 		t.Errorf("Did not expect any error, but get: %s", err.Error())
 	}
-	fmt.Printf("%+v", account)
-	fmt.Println("")
 }
 
 func TestCreateCharge(t *testing.T) {
-	fmt.Println("Xfers: Create Charge")
+	TEST_KEY := fetchEnvVars(t)
 	xClient, _ := xfers.NewClient(TEST_KEY, IS_SANDBOX)
 
 	chargeParam := xfers.XfersChargeReqParam{}
@@ -73,7 +74,7 @@ func TestCreateCharge(t *testing.T) {
 	chargeParam.CancelUrl = "http://test.com/cancel"
 	chargeParam.Redirect = "false"
 	chargeParam.Refundable = "true"
-	chargeParam.ReceiptEmail = RECEIPT_EMAIL
+	chargeParam.ReceiptEmail = "test@email.com"
 	chargeParam.HrsToExpirations = "48.0"
 
 	chargeParam.Items = []xfers.XfersItem{}
@@ -99,29 +100,20 @@ func TestCreateCharge(t *testing.T) {
 		t.Errorf("Did not expect any error, but get: %s", err.Error())
 		return
 	}
-	fmt.Println("Xfers Charge:")
-	fmt.Printf("%+v", xfersCharge)
-	fmt.Println("")
 
-	fmt.Println("Xfers: Retrieve Charge Details")
-	xfersChargeCheck, err := xClient.RetrieveCharge(xfersCharge.Id)
+	_, err = xClient.RetrieveCharge(xfersCharge.Id)
 	if err != nil {
 		t.Errorf("Did not expect any error, but get: %s", err.Error())
 	}
-	fmt.Println("Xfers Charge Check:")
-	fmt.Printf("%+v", xfersChargeCheck)
-	fmt.Println("")
 }
 
 func TestListAllCharges(t *testing.T) {
-	fmt.Println("Xfers: List All Charges")
+	TEST_KEY := fetchEnvVars(t)
 	xClient, _ := xfers.NewClient(TEST_KEY, IS_SANDBOX)
-	xfersCharges, err := xClient.ListAllCharges()
+	_, err := xClient.ListAllCharges()
 	if err != nil {
 		t.Errorf("Did not expect any error, but get: %s", err.Error())
 	}
-	fmt.Printf("%+v", xfersCharges)
-	fmt.Println("")
 }
 
 var letters = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ3456789")
