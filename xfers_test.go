@@ -4,6 +4,7 @@ import (
 	"../go-xfers"
 	"crypto/rand"
 	"encoding/binary"
+	// "fmt"
 	random "math/rand"
 	"net/http"
 	"os"
@@ -14,16 +15,20 @@ const XFERS_ENDPOINT_SANDBOX = "https://sandbox.xfers.io/api/v3"
 const XFERS_ENDPOINT = "https://www.xfers.io/api/v3"
 const IS_SANDBOX = true // for testing always use the sandbox version
 
-func fetchEnvVars(t *testing.T) (key string) {
+func fetchEnvVars(t *testing.T) (key, notifyUrl string) {
 	key = os.Getenv("XFERS_TEST_KEY")
 	if len(key) <= 0 {
 		t.Fatalf("Test cannot run because cannot get environment variable XFERS_TEST_KEY")
+	}
+	notifyUrl = os.Getenv("XFERS_NOTIFY_URL")
+	if len(notifyUrl) <= 0 {
+		t.Fatalf("Test cannot run because cannot get environment variable XFERS_NOTIFY_URL")
 	}
 	return
 }
 
 func TestNewClient(t *testing.T) {
-	TEST_KEY := fetchEnvVars(t)
+	TEST_KEY, _ := fetchEnvVars(t)
 	_, err := xfers.NewClient("", true)
 	if err == nil {
 		t.Errorf("Expected an error, due to missing API Key.")
@@ -41,7 +46,7 @@ func TestNewClient(t *testing.T) {
 }
 
 func TestPerformRequest(t *testing.T) {
-	TEST_KEY := fetchEnvVars(t)
+	TEST_KEY, _ := fetchEnvVars(t)
 	xClient, _ := xfers.NewClient(TEST_KEY, IS_SANDBOX)
 	req, _ := http.NewRequest("GET", xClient.Endpoint+"/authorize/hello", nil)
 	_, err := xClient.PerformRequest(req)
@@ -51,7 +56,7 @@ func TestPerformRequest(t *testing.T) {
 }
 
 func TestGetAccount(t *testing.T) {
-	TEST_KEY := fetchEnvVars(t)
+	TEST_KEY, _ := fetchEnvVars(t)
 	xClient, _ := xfers.NewClient(TEST_KEY, IS_SANDBOX)
 	_, err := xClient.GetAccountInfo()
 	if err != nil {
@@ -60,7 +65,7 @@ func TestGetAccount(t *testing.T) {
 }
 
 func TestCreateCharge(t *testing.T) {
-	TEST_KEY := fetchEnvVars(t)
+	TEST_KEY, NOTIFY_URL := fetchEnvVars(t)
 	xClient, _ := xfers.NewClient(TEST_KEY, IS_SANDBOX)
 
 	chargeParam := xfers.XfersChargeReqParam{}
@@ -69,7 +74,7 @@ func TestCreateCharge(t *testing.T) {
 	chargeParam.Currency = "SGD"
 	chargeParam.OrderId = RandSeq(10)
 	chargeParam.Description = "Test create charge"
-	chargeParam.NotifyUrl = "https://www.ikoustyle.com/test/xfers/callback"
+	chargeParam.NotifyUrl = NOTIFY_URL
 	chargeParam.ReturnUrl = "http://test.com/return"
 	chargeParam.CancelUrl = "http://test.com/cancel"
 	chargeParam.Redirect = "false"
@@ -108,7 +113,7 @@ func TestCreateCharge(t *testing.T) {
 }
 
 func TestListAllCharges(t *testing.T) {
-	TEST_KEY := fetchEnvVars(t)
+	TEST_KEY, _ := fetchEnvVars(t)
 	xClient, _ := xfers.NewClient(TEST_KEY, IS_SANDBOX)
 	_, err := xClient.ListAllCharges()
 	if err != nil {
