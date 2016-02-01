@@ -42,5 +42,6 @@ There's a test suite included.  To run it, simply run:
 You'll have to have set the following environment variables to run the tests:
 
     export XFERS_TEST_KEY=XXX (Your Xfers Sandbox key, get from: https://sandbox.xfers.io/api_tokens)
+    export XFERS_NOTIFY_URL=XXX (Your server callback endpoint for Xfers server to call for transaction status)
 
 Tests currently run in sandbox.

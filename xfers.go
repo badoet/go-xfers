@@ -10,6 +10,7 @@ import (
 
 const XFERS_ENDPOINT_SANDBOX = "https://sandbox.xfers.io/api/v3"
 const XFERS_ENDPOINT = "https://www.xfers.io/api/v3"
+const XFERS_FEE = 0.89 // as of 29 Jan 2016
 
 type XfersClient struct {
 	Endpoint  string
@@ -49,24 +50,24 @@ type XfersAccount struct {
 }
 
 type XfersChargeReqParam struct {
-	Amount           string      `json:"amount"`      // ! total XfersCharge.Items.price must sum up to XferCharge.Amount
-	Currency         string      `json:"currency"`    // !
-	OrderId          string      `json:"order_id"`    // !
-	Description      string      `json:"description"` // !
+	Amount           float64     `json:"amount,string"` // ! total XfersCharge.Items.price must sum up to XferCharge.Amount
+	Currency         string      `json:"currency"`      // !
+	OrderId          string      `json:"order_id"`      // !
+	Description      string      `json:"description"`   // !
 	NotifyUrl        string      `json:"notify_url,omitempty"`
 	ReturnUrl        string      `json:"return_url,omitempty"`
 	CancelUrl        string      `json:"cancel_url,omitempty"`
-	Refundable       string      `json:"refundable,omitempty"` // Default true
-	Redirect         string      `json:"redirect,omitempty"`   // Default true
-	Items            []XfersItem `json:"items,omitempty"`      // JSON formatted array of items- description, name, price, quantity
-	Shipping         string      `json:"shipping,omitempty"`
-	Tax              string      `json:"tax,omitempty"`
-	HrsToExpirations string      `json:"hrs_to_expirations,omitempty"` // Default to 48 hours from now
+	Refundable       bool        `json:"refundable,omitempty,string"` // Default true
+	Redirect         bool        `json:"redirect,string"`             // Default true
+	Items            []XfersItem `json:"items,omitempty"`             // JSON formatted array of items- description, name, price, quantity
+	Shipping         float64     `json:"shipping,omitempty,string"`
+	Tax              float64     `json:"tax,omitempty,string"`
+	HrsToExpirations float64     `json:"hrs_to_expirations,omitempty,string"` // Default to 48 hours from now
 	ReceiptEmail     string      `json:"receipt_email,omitempty"`
-	UserApiToken     string      `json:"user_api_token,omitempty"` // Optional
-	UserPhoneNo      string      `json:"user_phone_no,omitempty"`  // Default false
-	DebitOnly        string      `json:"debit_only,omitempty"`     // Default false
-	MetaData         string      `json:"meta_data,omitempty"`      // Key value pairs json
+	UserApiToken     string      `json:"user_api_token,omitempty"`       // Optional
+	UserPhoneNo      bool        `json:"user_phone_no,omitempty,string"` // Default false
+	DebitOnly        bool        `json:"debit_only,omitempty,string"`    // Default false
+	MetaData         string      `json:"meta_data,omitempty"`            // Key value pairs json
 }
 
 type XfersItem struct {
@@ -78,32 +79,32 @@ type XfersItem struct {
 }
 
 type XfersCharge struct {
-	Id                  string `json:"id"`
-	CheckoutUrl         string `json:"checkout_url"`
-	NotifyUrl           string `json:"notify_url"`
-	ReturnUrl           string `json:"return_url"`
-	CancelUrl           string `json:"cancel_url"`
-	Object              string `json:"object"` // 'charge'
-	Amount              string `json:"amount"`
-	Currency            string `json:"currency"`
-	Customer            string `json:"customer"`
-	OrderId             string `json:"order_id"`
-	Capture             bool   `json:"capture"`
-	Refundable          bool   `json:"refundable"`
-	Description         string `json:"description"`
-	StatementDescriptor string `json:"statement_Descriptor"`
-	ReceiptEmail        string `json:"receipt_email"`
-	Shipping            string `json:"shipping"`
-	Tax                 string `json:"tax"`
-	TotalAmount         string `json:"total_amount"`
-	Status              string `json:"status"`
+	Id                  string  `json:"id"`
+	CheckoutUrl         string  `json:"checkout_url"`
+	NotifyUrl           string  `json:"notify_url"`
+	ReturnUrl           string  `json:"return_url"`
+	CancelUrl           string  `json:"cancel_url"`
+	Object              string  `json:"object"` // 'charge'
+	Amount              float64 `json:"amount,string"`
+	Currency            string  `json:"currency"`
+	Customer            string  `json:"customer"`
+	OrderId             string  `json:"order_id"`
+	Capture             bool    `json:"capture"`
+	Refundable          bool    `json:"refundable"`
+	Description         string  `json:"description"`
+	StatementDescriptor string  `json:"statement_Descriptor"`
+	ReceiptEmail        string  `json:"receipt_email"`
+	Shipping            float64 `json:"shipping,string"`
+	Tax                 float64 `json:"tax,string"`
+	TotalAmount         float64 `json:"total_amount,string"`
+	Status              string  `json:"status"`
 }
 
 type XfersVerifyParam struct {
-	OrderId     string `json:"order_id"`
-	TotalAmount string `json:"total_amount"`
-	Currency    string `json:"currency"`
-	Status      string `json:"status"`
+	OrderId     string  `json:"order_id"`
+	TotalAmount float64 `json:"total_amount,string"`
+	Currency    string  `json:"currency"`
+	Status      string  `json:"status"`
 }
 
 type XfersNotifyParam struct {
@@ -145,7 +146,6 @@ func (xClient *XfersClient) PerformRequest(req *http.Request) ([]byte, error) {
 		return nil, err
 	}
 
-	// fmt.Printf("%v", string(body))
 	if body == nil {
 		return nil, errors.New("Missing body")
 	}
@@ -180,6 +180,7 @@ func (xClient *XfersClient) GetAccountInfo() (XfersAccount, error) {
 
 func (xClient *XfersClient) CreateCharge(param XfersChargeReqParam) (XfersCharge, error) {
 	xfersCharge := XfersCharge{}
+	param.Redirect = false // Force to JSON Response!
 	paramJson, err := json.Marshal(param)
 	if err != nil {
 		return xfersCharge, err

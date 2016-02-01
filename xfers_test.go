@@ -4,7 +4,6 @@ import (
 	"../go-xfers"
 	"crypto/rand"
 	"encoding/binary"
-	// "fmt"
 	random "math/rand"
 	"net/http"
 	"os"
@@ -69,18 +68,17 @@ func TestCreateCharge(t *testing.T) {
 	xClient, _ := xfers.NewClient(TEST_KEY, IS_SANDBOX)
 
 	chargeParam := xfers.XfersChargeReqParam{}
-	chargeParam.Amount = "100.23"
-	chargeParam.Shipping = "0.0"
+	chargeParam.Amount = 100.23
+	chargeParam.Shipping = 0.0
 	chargeParam.Currency = "SGD"
 	chargeParam.OrderId = RandSeq(10)
 	chargeParam.Description = "Test create charge"
 	chargeParam.NotifyUrl = NOTIFY_URL
 	chargeParam.ReturnUrl = "http://test.com/return"
 	chargeParam.CancelUrl = "http://test.com/cancel"
-	chargeParam.Redirect = "false"
-	chargeParam.Refundable = "true"
+	chargeParam.Refundable = true
 	chargeParam.ReceiptEmail = "test@email.com"
-	chargeParam.HrsToExpirations = "48.0"
+	chargeParam.HrsToExpirations = 48.0
 
 	chargeParam.Items = []xfers.XfersItem{}
 
