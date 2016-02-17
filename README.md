@@ -135,6 +135,7 @@ func XfersVerifyNotification(params xfers.XfersNotifyParam) (bool, error) {
 
 Feel free to open New Issue, if you encounter error or need help with the integration
 Looking forward for feedbacks. Hope someone will find this useful!
+Currently used in production at https://www.ikoustyle.com
 
 Running Tests
 ---
