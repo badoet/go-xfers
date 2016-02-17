@@ -107,6 +107,13 @@ type XfersVerifyParam struct {
 	Status      string  `json:"status"`
 }
 
+func (x *XfersVerifyParam) Init(param XfersNotifyParam) {
+	x.OrderId = param.OrderId
+	x.TotalAmount = param.TotalAmount
+	x.Currency = param.Currency
+	x.Status = param.Status
+}
+
 type XfersNotifyParam struct {
 	TxnId       string  `form:"txn_id" json:"txn_id" binding:"required"`
 	OrderId     string  `form:"order_id" json:"order_id" binding:"required"`
