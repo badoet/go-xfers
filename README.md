@@ -27,7 +27,7 @@ go get github.com/badoet/go-xfers
 ####### Standard Go Usage (EXAMPLE)
 ```go
 import (
-  xfers "github.com/badoet/go-xfers"
+   "github.com/badoet/go-xfers"
 )
 
 var XfersAPI *xfers.XfersClient
