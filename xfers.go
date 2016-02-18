@@ -8,9 +8,11 @@ import (
 	"net/http"
 )
 
-const XFERS_ENDPOINT_SANDBOX = "https://sandbox.xfers.io/api/v3"
-const XFERS_ENDPOINT = "https://www.xfers.io/api/v3"
-const XFERS_FEE = 0.89 // as of 29 Jan 2016
+const (
+	XfersEndPointSandbox = "https://sandbox.xfers.io/api/v3"
+	XferEndpoint         = "https://www.xfers.io/api/v3"
+	XfersFee             = 0.89 // as of 29 Jan 2016
+)
 
 type XfersClient struct {
 	Endpoint  string
@@ -131,9 +133,9 @@ func NewClient(key string, usesSandbox bool) (*XfersClient, error) {
 	xfersClient.key = key
 	xfersClient.client = new(http.Client)
 	if xfersClient.isSandbox {
-		xfersClient.Endpoint = XFERS_ENDPOINT_SANDBOX
+		xfersClient.Endpoint = XfersEndPointSandbox
 	} else {
-		xfersClient.Endpoint = XFERS_ENDPOINT
+		xfersClient.Endpoint = XferEndpoint
 	}
 	return &xfersClient, nil
 }

@@ -10,7 +10,7 @@ import (
 	"testing"
 )
 
-const XFERS_ENDPOINT_SANDBOX = "https://sandbox.xfers.io/api/v3"
+const XfersEndPointSandbox = "https://sandbox.xfers.io/api/v3"
 const XFERS_ENDPOINT = "https://www.xfers.io/api/v3"
 const IS_SANDBOX = true // for testing always use the sandbox version
 
@@ -34,7 +34,7 @@ func TestNewClient(t *testing.T) {
 	}
 
 	sandboxClient, _ := xfers.NewClient(TEST_KEY, true)
-	if sandboxClient.Endpoint != XFERS_ENDPOINT_SANDBOX {
+	if sandboxClient.Endpoint != XfersEndPointSandbox {
 		t.Errorf("Expected a sandbox endpoint, but get: %v", sandboxClient.Endpoint)
 	}
 
