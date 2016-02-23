@@ -10,9 +10,7 @@ import (
 	"testing"
 )
 
-const XFERS_ENDPOINT_SANDBOX = "https://sandbox.xfers.io/api/v3"
-const XFERS_ENDPOINT = "https://www.xfers.io/api/v3"
-const IS_SANDBOX = true // for testing always use the sandbox version
+const isSandbox = true // for testing always use the sandbox version
 
 func fetchEnvVars(t *testing.T) (key, notifyUrl string) {
 	key = os.Getenv("XFERS_TEST_KEY")
@@ -27,26 +25,26 @@ func fetchEnvVars(t *testing.T) (key, notifyUrl string) {
 }
 
 func TestNewClient(t *testing.T) {
-	TEST_KEY, _ := fetchEnvVars(t)
+	key, _ := fetchEnvVars(t)
 	_, err := xfers.NewClient("", true)
 	if err == nil {
 		t.Errorf("Expected an error, due to missing API Key.")
 	}
 
-	sandboxClient, _ := xfers.NewClient(TEST_KEY, true)
-	if sandboxClient.Endpoint != XFERS_ENDPOINT_SANDBOX {
+	sandboxClient, _ := xfers.NewClient(key, true)
+	if sandboxClient.Endpoint != xfers.EndpointSandbox {
 		t.Errorf("Expected a sandbox endpoint, but get: %v", sandboxClient.Endpoint)
 	}
 
-	productionClient, _ := xfers.NewClient(TEST_KEY, false)
-	if productionClient.Endpoint != XFERS_ENDPOINT {
+	productionClient, _ := xfers.NewClient(key, false)
+	if productionClient.Endpoint != xfers.Endpoint {
 		t.Errorf("Expected a production endpoint, but get: %v", productionClient.Endpoint)
 	}
 }
 
 func TestPerformRequest(t *testing.T) {
-	TEST_KEY, _ := fetchEnvVars(t)
-	xClient, _ := xfers.NewClient(TEST_KEY, IS_SANDBOX)
+	key, _ := fetchEnvVars(t)
+	xClient, _ := xfers.NewClient(key, isSandbox)
 	req, _ := http.NewRequest("GET", xClient.Endpoint+"/authorize/hello", nil)
 	_, err := xClient.PerformRequest(req)
 	if err != nil {
@@ -55,8 +53,8 @@ func TestPerformRequest(t *testing.T) {
 }
 
 func TestGetAccount(t *testing.T) {
-	TEST_KEY, _ := fetchEnvVars(t)
-	xClient, _ := xfers.NewClient(TEST_KEY, IS_SANDBOX)
+	key, _ := fetchEnvVars(t)
+	xClient, _ := xfers.NewClient(key, isSandbox)
 	_, err := xClient.GetAccountInfo()
 	if err != nil {
 		t.Errorf("Did not expect any error, but get: %s", err.Error())
@@ -64,31 +62,31 @@ func TestGetAccount(t *testing.T) {
 }
 
 func TestCreateCharge(t *testing.T) {
-	TEST_KEY, NOTIFY_URL := fetchEnvVars(t)
-	xClient, _ := xfers.NewClient(TEST_KEY, IS_SANDBOX)
+	key, notifyUrl := fetchEnvVars(t)
+	xClient, _ := xfers.NewClient(key, isSandbox)
 
-	chargeParam := xfers.XfersChargeReqParam{}
+	chargeParam := xfers.ChargeReqParam{}
 	chargeParam.Amount = 100.23
 	chargeParam.Shipping = 0.0
 	chargeParam.Currency = "SGD"
 	chargeParam.OrderId = RandSeq(10)
 	chargeParam.Description = "Test create charge"
-	chargeParam.NotifyUrl = NOTIFY_URL
+	chargeParam.NotifyUrl = notifyUrl
 	chargeParam.ReturnUrl = "http://test.com/return"
 	chargeParam.CancelUrl = "http://test.com/cancel"
 	chargeParam.Refundable = true
 	chargeParam.ReceiptEmail = "test@email.com"
 	chargeParam.HrsToExpirations = 48.0
 
-	chargeParam.Items = []xfers.XfersItem{}
+	chargeParam.Items = []xfers.Item{}
 
-	item1 := xfers.XfersItem{}
+	item1 := xfers.Item{}
 	item1.Description = "Item 1 Test"
 	item1.Price = 20.23
 	item1.Quantity = 1
 	item1.Name = "Item 1"
 
-	item2 := xfers.XfersItem{}
+	item2 := xfers.Item{}
 	item2.Description = "Item 2 Test"
 	item2.Price = 80
 	item2.Quantity = 1
@@ -111,8 +109,8 @@ func TestCreateCharge(t *testing.T) {
 }
 
 func TestListAllCharges(t *testing.T) {
-	TEST_KEY, _ := fetchEnvVars(t)
-	xClient, _ := xfers.NewClient(TEST_KEY, IS_SANDBOX)
+	key, _ := fetchEnvVars(t)
+	xClient, _ := xfers.NewClient(key, isSandbox)
 	_, err := xClient.ListAllCharges()
 	if err != nil {
 		t.Errorf("Did not expect any error, but get: %s", err.Error())
