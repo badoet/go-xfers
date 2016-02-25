@@ -6,5 +6,5 @@ type Item struct {
 	Name        string  `json:"name"`
 	Price       float64 `json:"price"`
 	Quantity    float64 `json:"quantity"`
-	ItemId      string  `json:"item_id,omitempty"` // Optional
+	ItemID      string  `json:"item_id,omitempty"` // Optional
 }

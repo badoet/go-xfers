@@ -69,11 +69,11 @@ func TestCreateCharge(t *testing.T) {
 	chargeParam.Amount = 100.23
 	chargeParam.Shipping = 0.0
 	chargeParam.Currency = "SGD"
-	chargeParam.OrderId = RandSeq(10)
+	chargeParam.OrderID = RandSeq(10)
 	chargeParam.Description = "Test create charge"
-	chargeParam.NotifyUrl = notifyUrl
-	chargeParam.ReturnUrl = "http://test.com/return"
-	chargeParam.CancelUrl = "http://test.com/cancel"
+	chargeParam.NotifyURL = notifyUrl
+	chargeParam.ReturnURL = "http://test.com/return"
+	chargeParam.CancelURL = "http://test.com/cancel"
 	chargeParam.Refundable = true
 	chargeParam.ReceiptEmail = "test@email.com"
 	chargeParam.HrsToExpirations = 48.0
@@ -102,7 +102,7 @@ func TestCreateCharge(t *testing.T) {
 		return
 	}
 
-	_, err = xClient.RetrieveCharge(xfersCharge.Id)
+	_, err = xClient.RetrieveCharge(xfersCharge.ID)
 	if err != nil {
 		t.Errorf("Did not expect any error, but get: %s", err.Error())
 	}

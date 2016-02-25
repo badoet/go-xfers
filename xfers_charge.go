@@ -2,16 +2,16 @@ package xfers
 
 // Charge represent the xfers charge information
 type Charge struct {
-	Id                  string  `json:"id"`
-	CheckoutUrl         string  `json:"checkout_url"`
-	NotifyUrl           string  `json:"notify_url"`
-	ReturnUrl           string  `json:"return_url"`
-	CancelUrl           string  `json:"cancel_url"`
+	ID                  string  `json:"id"`
+	CheckoutURL         string  `json:"checkout_url"`
+	NotifyURL           string  `json:"notify_url"`
+	ReturnURL           string  `json:"return_url"`
+	CancelURL           string  `json:"cancel_url"`
 	Object              string  `json:"object"` // 'charge'
 	Amount              float64 `json:"amount,string"`
 	Currency            string  `json:"currency"`
 	Customer            string  `json:"customer"`
-	OrderId             string  `json:"order_id"`
+	OrderID             string  `json:"order_id"`
 	Capture             bool    `json:"capture"`
 	Refundable          bool    `json:"refundable"`
 	Description         string  `json:"description"`
