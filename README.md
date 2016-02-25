@@ -30,7 +30,7 @@ import (
    "github.com/badoet/go-xfers"
 )
 
-var XfersAPI *xfers.XfersClient
+var XfersAPI *xfers.Client
 
 func init() {
 	if IsProduction() {
@@ -59,25 +59,25 @@ In normal circumstances, there is no need to recreate this client for every sing
 
 ####### Create an Xfers Charge (EXAMPLE)
 ```go
-func XfersCheckout(order Order) (xfers.XfersCharge, error) {
+func XfersCheckout(order Order) (xfers.Charge, error) {
 
-	xfersItemList := []xfers.XfersItem{}
+	xfersItemList := []xfers.Item{}
 	for _, cartItem := range cartList { // for reference only
-		xfersItem := xfers.XfersItem{}
+		xfersItem := xfers.Item{}
 		xfersItem.Price = cartItem.Price
 		xfersItem.Quantity = 1
 		xfersItem.Name = cartItem.Name
 		xfersItemList = append(xfersItemList, xfersItem)
 	}
 
-	chargeParam := xfers.XfersChargeReqParam{}
+	chargeParam := xfers.ChargeReqParam{}
 	chargeParam.Amount = order.TotalCost
 	chargeParam.Shipping = order.ShippingFee
 	chargeParam.Currency = order.Currency
-	chargeParam.OrderId = order.Id
-	chargeParam.NotifyUrl = <URL for Xfers server to call to notify the transaction status>
-	chargeParam.ReturnUrl = <URL for user to go back to after successful transaction>
-	chargeParam.CancelUrl = <URL for user to go back to if user cancel the transaction>
+	chargeParam.OrderID = order.Id
+	chargeParam.NotifyURL = <URL for Xfers server to call to notify the transaction status>
+	chargeParam.ReturnURL = <URL for user to go back to after successful transaction>
+	chargeParam.CancelURL = <URL for user to go back to if user cancel the transaction>
 	chargeParam.Redirect = false // false means the Xfers server will return us JSON response instead of redirecting directly to the Xfers page
 	chargeParam.Refundable = true
 	chargeParam.ReceiptEmail = order.Email
@@ -101,7 +101,7 @@ To capture the request, you can do something like this:
 ```go
 func XfersDone(c *gin.Context) { // im using Gin for my webframework in this example
 	defer c.String(http.StatusOK, "ok")
-	notification := xfers.XfersNotifyParam{}
+	notification := xfers.NotifyParam{}
 	err := c.Bind(&notification)
 
 	// verify the xfers request (reccomended that you do this process)
@@ -124,8 +124,8 @@ As for the `XfersVerifyNotification` function, you can follow this code snippet:
 
 ####### Verify Xfers Notification (EXAMPLE)
 ```go
-func XfersVerifyNotification(params xfers.XfersNotifyParam) (bool, error) {
-	verifyParam := xfers.XfersVerifyParam{}
+func XfersVerifyNotification(params xfers.NotifyParam) (bool, error) {
+	verifyParam := xfers.VerifyParam{}
 	verifyParam.Init(params)
 	xfersMsg, err := XfersAPI.VerifyCharge(params.TxnId, verifyParam)
 	return (xfersMsg.Msg == "VERIFIED"), err
