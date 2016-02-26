@@ -2,6 +2,7 @@ go-xfers
 ========
 
 [![Circle CI](https://circleci.com/gh/badoet/go-xfers/tree/master.svg?style=svg)](https://circleci.com/gh/badoet/go-xfers/tree/master)
+[![Go Report Card](https://goreportcard.com/badge/github.com/badoet/go-xfers)](https://goreportcard.com/report/github.com/badoet/go-xfers)
 
 Xfers api interface using golang
 https://www.xfers.io/
